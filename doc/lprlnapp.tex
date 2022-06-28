@@ -275,7 +275,7 @@ The integrated Lorenz curve is
 \end{align*}
 
 \subsubsection{Pareto bins}
-For Pareto distrubted bins
+For Pareto distributed bins
 \begin{align*}
   \mu_K & = \frac{\alpha_K\kappa_K}{\alpha_K - 1} &&& \mbox{ if } \alpha_K > 1\\
   \sigma_K^2 &= \frac{\kappa_K^2\alpha_K}{(\alpha_K-1)^2(\alpha_K-2)} &&& \mbox{ if } \alpha_K > 2\\
@@ -615,7 +615,7 @@ Strictly speaking both $H_R$ and $D$ are functions of the model parameters for e
 
 In a naive Monte Carlo approximation of $D$ given $M$ draws from the posterior, and $L$ draws for the Monte Carlo simulation, and $I$ tracts, characterizing the posterior of $D$ requires $\mathcal{O}(MLI^2)$ tract-level log density evaluations -- note that computing $f = \sum_{i=1}^Iw_if_i$ requires $I$ tract level log density evaluations, and $\mathcal{O}(MLI)$ simulations. This can be quite slow.
 
-So we use two approaches to speed this up. First, since the latent PRLN density is piecewise defined, we break each integral into $K$ piecewise  sub-integrals. In income bins where all $I$ tracts are uniformly distributed, this allows us to solve the sub-integrals analytically. Second, for a given income bin, we only simulate one set of incomes that is used to compute the sub-intregrals for all tracts in that bin. This reduces the number of tract-level log density evaluations to $\mathcal{O}(MLI)$ and the number of simulations to $\mathcal{O}(ML)$, at the cost of inducing error correlations between each of the $D(f_i||f)$s. This correlation structure must be taken into account to compute the correct standard error for our estimate of $D$. We use the same basic approach for approximating $H_R$. Details follow in Appendix~\ref{app:compute.div}.
+So we use two approaches to speed this up. First, since the latent PRLN density is piecewise defined, we break each integral into $K$ piecewise  sub-integrals. In income bins where all $I$ tracts are uniformly distributed, this allows us to solve the sub-integrals analytically. Second, for a given income bin, we only simulate one set of incomes that is used to compute the sub-integrals for all tracts in that bin. This reduces the number of tract-level log density evaluations to $\mathcal{O}(MLI)$ and the number of simulations to $\mathcal{O}(ML)$, at the cost of inducing error correlations between each of the $D(f_i||f)$s. This correlation structure must be taken into account to compute the correct standard error for our estimate of $D$. We use the same basic approach for approximating $H_R$. Details follow in Appendix~\ref{app:compute.div}.
 
 The computational problem for $H_R$ is easier, and our approach is simpler -- we use a straightforward importance sampler estimator, again using the same importance samples for all tracts within a metro area. But we do not separately sample from each bin. Details are in Appendix~\ref{app:compute.info}.
 
@@ -700,7 +700,7 @@ Then our estimator for $H_R$ is given by \eqref{eq:app.HR.estimator} with associ
 \end{align}
 
 \subsection{ADDITIONAL COMPUTATIONAL DETAILS}
-We computed these indices for the top 100 metro areas in the U.S. by population in three distinct settings: for the household income distribution, for the black households only income distribution, and for the white hosueholds only income distribution. In each case, we used the following procedure.
+We computed these indices for the top 100 metro areas in the U.S. by population in three distinct settings: for the household income distribution, for the black households only income distribution, and for the white households only income distribution. In each case, we used the following procedure.
 
 For a given metro area, we fit L-PRLN to the relevant household income distribution for each Census tract within the metro area, using Stan \citep{stan2017manual} on a high performance computing cluster. We use 2000 iterations for tuning and warmup, and kept $M=2000$ iterations for inference, and obtained 4 chains in this manner. Then, we computed both $D$ and $H_R$ for all 2000 iterations of the MCMC sample. For $D$ we set $L=500$, and for $H_R$ we set $L=1000$. Standard errors for $D$ were typically about $0.3\%$ of their associated estimates, and the largest was about $1.8\%$. Standard errors for $H_R$ were typically about $2\%$ of their associated estimates, though the largest was about $24\%$. Note that these standard errors were accounted for in the EIV regressions.
 
@@ -919,6 +919,55 @@ Intercept & 0.405 & 0.188 & 0.440 & -0.660 & -0.101 & 0.179 & 0.471 & 1.079 \\
 \label{tab:eiv.kl.raw.white}
 \end{table}
 
+\clearpage
+
+\subsection{Standardized Information Index Regression Coefficients}
+\citet{reardon2011income} report raw information index regression coefficients in their Table~4. To be able to directly compare these coefficients to our own, especially our divergence index regression coefficients, we need to standardize them. To do this, we need the sample standard deviations of the information theory index and the Gini coefficient from the sample used for the regressions in \citet{reardon2011income}'s Table~4. They report basic summary statistics for each year-race cross section in their Table~2, which we can use to construct the combined-years sample standard deviations needed to standardize the coefficients in Table~4.
+
+For a particular variable (information index or Gini coefficient) and a particular race (black, white, or all), we can construct the combined sample standard deviation as follows. Let $N$ denote the sample size for that variable per year---for white families and all families $N=100$, while for black families $N=61$. Additionally, let $k=1,2,...,K$ index years, $m_k$ denote the sample mean for year $k$, and $s_k$ denote the sample standard deviation for year $k$. First let
+\begin{align*}
+m = \frac{1}{K}\sum_{k=1}^Km_k
+\end{align*}
+denote the combined mean. Then the combined variance is given by
+\begin{align*}
+s^2= \frac{\sum_{k=1}^K\left[(N-1)s_k^2 + nm_k^2\right] - KNm^2}{KN - 1}
+\end{align*}
+and then combined standard deviation is given by $s = \sqrt{s^2}$.
+
+Table~\ref{tab:sds} contains means and standard deviations for the Gini coefficient and the information index from \citet{reardon2011income}'s Table~2, as well as the combined standard deviations computed with the formula above.
+Finally, Table~\ref{tab:std.coefs} contains the original raw from \citet{reardon2011income}'s Table~4 as well as the standardized coefficients using the combined standard deviations computed above.
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{l|rrrr|rrrrl}
+& \multicolumn{4}{c}{Gini Coefficient Means} & \multicolumn{5}{c}{Gini Coefficient SDs} \\\hline
+    Race  & 1970  & 1980  & 1990  & 2000  & 1970  & 1980  & 1990  & 2000  & Combined \\\hline
+    All   & 0.352 & 0.360 & 0.384 & 0.400 & 0.029 & 0.023 & 0.026 & 0.025 & 0.032 \\    
+    Black & 0.376 & 0.410 & 0.430 & 0.436 & 0.018 & 0.017 & 0.030 & 0.024 & 0.033 \\
+    White & 0.344 & 0.341 & 0.369 & 0.384 & 0.028 & 0.020 & 0.026 & 0.025 & 0.031 \\
+    \multicolumn{10}{c}{} \\
+& \multicolumn{4}{c}{Information Index Means} & \multicolumn{5}{c}{Information Index SDs} \\\hline
+    All   & 0.124 & 0.134 & 0.152 & 0.157 & 0.142 & 0.044 & 0.052 & 0.050 & 0.051 \\    
+    Black & 0.099 & 0.133 & 0.173 & 0.170 & 0.144 & 0.029 & 0.036 & 0.042 & 0.049 \\
+    White & 0.110 & 0.117 & 0.132 & 0.139 & 0.125 & 0.039 & 0.043 & 0.043 & 0.044 \\
+  \end{tabular}
+\label{tab:sds}
+\caption{Means and standard deviations for the Gini coefficient and the information index from \citet{reardon2011income}.}
+\end{table}
+
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{lrrrr}
+      & \multicolumn{2}{c}{Raw $\widehat{\beta}$} & \multicolumn{2}{c}{Std $\widehat{\beta}$}\\\hline
+    Race  & Beta & SE & Beta & SE \\\hline
+    All   & 0.561 & 0.085 & 0.353 & 0.053 \\    
+    Black & 0.470 & 0.124 & 0.316 & 0.083 \\
+    White & 0.450 & 0.110 & 0.311 & 0.076 \\
+  \end{tabular}
+  \label{tab:std.coefs}
+  \caption{Raw and standardized coefficients of the Gini coefficient from information index regressions from \citet{reardon2011income}.}
+\end{table}
 
 \clearpage
 
